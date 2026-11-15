@@ -1,0 +1,46 @@
+# ---- Lab evidence and analysis output (never commit) ----
+evidence/
+evidence-*/
+all-hashes.txt
+duplicates.txt
+hashes*.txt
+
+# ---- Backups, disk images and installers ----
+backup/
+backups/
+*.iso
+*.img
+*.dd
+*.E01
+*.vhd
+*.vhdx
+*.vmdk
+*.zip
+*.7z
+*.rar
+
+# ---- Local-only files ----
+*-local-backup.md
+LabShare/
+Drop/
+
+# ---- Possible malware samples (never commit) ----
+*.exe
+*.scr
+*.dll
+*.bat
+*.vbs
+*.lnk
+
+# ---- Secrets and credentials ----
+.env
+*.key
+*.pem
+*.ppk
+id_rsa*
+
+# ---- Editor and OS clutter ----
+.vscode/
+Thumbs.db
+desktop.ini
+.DS_Store
