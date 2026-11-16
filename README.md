@@ -3,9 +3,11 @@
 
 ## Project Status
 
-🚧 **In Progress: Phase 1 complete, Phase 2 (Data Preservation) under way**
+🚧 **In Progress: Phase 1 complete, Phases 2 to 4 under way**
 
-The lab network is built and working. The legacy Windows 8 laptop sits in an isolated network segment and can be administered remotely from a Windows 11 workstation. The next step is to back up the laptop's data safely, then investigate the infection.
+The lab network is built and working. The legacy Windows 8 laptop sits in an isolated network segment and is administered remotely from a Windows 11 workstation. Its drive has been examined read-only from a Linux Mint live USB, so the infected Windows never ran during evidence collection. Hashing and triage of likely hiding places turned up two suspicious Startup shortcuts, which are now under investigation.
+
+**Next:** analyse what those shortcuts launch, back up the laptop's data, then plan remediation.
 
 The project started as an idea for investigating a suspected malware infection on a legacy Windows laptop. It has grown into a broader **home networking, Windows administration, and cybersecurity laboratory**.
 
@@ -14,6 +16,15 @@ The project started as an idea for investigating a suspected malware infection o
 ## 📌 Overview
 
 The original idea came from a real issue: an older Windows laptop showing abnormal behaviour, including unusual USB file handling (files hidden inside a folder on a memory stick when it is plugged in) and instability during large file transfers. The laptop holds personal data from 2010 onward, so the goal is to investigate it and preserve that data rather than immediately formatting the machine.
+
+### Key results so far
+
+- Built an isolated double-NAT lab network and verified it with ping tests.
+- Collected evidence from a Linux Mint live USB with the Windows drive mounted read-only.
+- Hashed and triaged 290 files (248 unique hashes) from likely hiding places, and explained the repeated hashes as benign.
+- Found two suspicious Startup shortcuts: one launches a randomly named program and script from `AppData\Local`, and was modified on 14 November 2026.
+- Mapped the behaviour to MITRE ATT&CK techniques, marked Observed or Suspected.
+- Audited my own network shares, found an unexpected exposed share, and removed it.
 
 ---
 
@@ -29,7 +40,6 @@ The original idea came from a real issue: an older Windows laptop showing abnorm
 - Collect and analyse Windows security and system logs.
 - Practice PowerShell administration and automation.
 - Document findings and remediation procedures.
-- Apply security and access-control principles learned through Azure (AZ-104) training.
 
 ---
 
@@ -46,7 +56,7 @@ The D-Link router is connected behind the Huawei router, which creates a double 
 | Huawei WS7100 (household gateway)       | 192.168.3.1 | Household subnet 192.168.3.x       |
 | D-Link DWR-957M, WAN side               | 192.168.3.x | Assigned by the Huawei via DHCP    |
 | D-Link DWR-957M, LAN side (lab gateway) | 10.0.0.2    | Lab subnet 10.0.0.x                |
-| Windows 8 laptop                        | 10.0.0.x    | Reserve this address in the D-Link |
+| Windows 8 laptop (`idea-pc`)          | 10.0.0.x    | Reserve this address in the D-Link |
 
 The two subnets do not overlap, so no change to the D-Link's LAN address was needed.
 
@@ -54,27 +64,29 @@ The two subnets do not overlap, so no change to the D-Link's LAN address was nee
 
 ## 🧰 Hardware Register
 
-| Item                             | Role                                   | Status  |
-| -------------------------------- | -------------------------------------- | ------- |
-| Fibre wall terminal and modem    | ISP connection                         | In use  |
-| Huawei WS7100                    | Household router and Wi-Fi             | In use  |
-| D-Link DWR-957M                  | Lab router                             | In use  |
-| Windows 11 computer              | Admin workstation, builds the live USB | In use  |
-| Windows 8 Single Language laptop | Infected lab target, data since 2010   | In use  |
-| 32 GB USB flash drive            | Linux Mint live USB                    | In use  |
-| External hard drive              | Backup destination (lab-only)          | Planned |
-| Ethernet cables                  | Router link and lab connections        | In use  |
-
-Laptop specifications will be added once recorded.
+| Item                          | Details                                                                  | Role                                           | Status                          |
+| ----------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------- | ------------------------------- |
+| Fibre wall terminal and modem | ISP supplied                                                             | ISP connection                                 | In use                          |
+| Huawei WS7100                 | Household router                                                         | Household router and Wi-Fi                     | In use                          |
+| D-Link DWR-957M               | LTE-capable router, WAN port used                                        | Lab router                                     | In use                          |
+| Windows 11 computer           | Lenovo, Intel Core i5-10210U, 8 GB RAM, 477 GB storage                   | Admin workstation, builds the live USB         | In use                          |
+| Windows 8 laptop              | Lenovo, Intel Celeron B830 1.80 GHz, 2 GB RAM, 500 GB Hitachi hard drive | Suspected-infected lab target, data since 2010 | In use                          |
+| 32 GB USB flash drive         | Linux Mint 22.3 MATE live USB                                            | Boots the laptop without starting Windows      | In use                          |
+| External hard drive           | Transcend 1 TB (TS1TSJ25D3), about 931 GB usable, made 2015              | Backup destination (lab-only)                  | Available, health check pending |
+| Ethernet cables               |                                                                          | Router link and lab connections                | In use                          |
 
 ## 💾 Software Register
 
-| Software                  | Version        | Installed on                               | Purpose                                                                         | Source                       |
-| ------------------------- | -------------- | ------------------------------------------ | ------------------------------------------------------------------------------- | ---------------------------- |
-| TightVNC Server           | To be recorded | Windows 8 laptop                           | Remote screen access                                                            | Official TightVNC website    |
-| TightVNC Viewer           | To be recorded | Windows 11 computer                        | Remote control client                                                           | Official TightVNC website    |
-| Linux Mint (MATE, 64-bit) | 22.3           | Downloaded on Windows 11, for the live USB | Live environment for backing up the laptop without running the infected Windows | NTT DATA South Africa mirror |
-| Rufus                     | 4.15           | Windows 11 computer                        | Writes the ISO to the USB                                                       | Official Rufus website       |
+| Software                  | Version              | Installed on                               | Purpose                                                                            | Source                       |
+| ------------------------- | -------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------- |
+| TightVNC Server           | 4.0.2 (free edition) | Windows 8 laptop                           | Remote screen access                                                               | Official TightVNC website    |
+| TightVNC Viewer           | To be recorded       | Windows 11 computer                        | Remote control client                                                              | Official TightVNC website    |
+| Linux Mint (MATE, 64-bit) | 22.3                 | Downloaded on Windows 11, for the live USB | Live environment for investigating the laptop without running the infected Windows | NTT DATA South Africa mirror |
+| Rufus                     | 4.15                 | Windows 11 computer                        | Writes the ISO to the USB                                                          | Official Rufus website       |
+
+### Tools used
+
+Git and GitHub, VS Code, Git Bash, PowerShell, `certutil`, `net share`, `icacls`, `net user`, and on Linux `lsblk`, `findmnt`, `mount`, `sha256sum`, `find`, `strings` and `stat`.
 
 ### Download integrity
 
@@ -86,6 +98,7 @@ Checksum command used on Windows 11: `certutil -hashfile <filename> SHA256`
 
 ### Planned software
 
+- VirusTotal (hash lookups only, no files uploaded)
 - Sysinternals Autoruns and Process Explorer
 - Wireshark
 - VirtualBox or VMware with a Kali Linux VM
@@ -118,28 +131,104 @@ Checksum command used on Windows 11: `certutil -hashfile <filename> SHA256`
 
 ---
 
+## 🔬 Evidence Collection Method
+
+1. Booted the laptop from a **Linux Mint live USB**, so the infected Windows never ran during collection.
+2. Mounted the Windows partition **read-only** and confirmed it with `findmnt` (`ro`). Mint had automounted it first, so it was remounted read-only before anything was read.
+3. Ran read-only scripts (see below) that hash executables in likely hiding places and read Startup shortcuts. Results were written to a separate folder, never to the Windows drive.
+4. Moved the scripts in, and the results out, over a temporary SMB share on the lab network, using a dedicated low-privilege account. The shares and the account were removed afterwards.
+5. Kept the raw evidence **outside this repository** and excluded it with `.gitignore`. Only cleaned findings are published here.
+
+---
+
+## 🔎 Investigation Findings (in progress)
+
+### Hash triage
+
+| Location checked                                  | Hashes                     |
+| ------------------------------------------------- | -------------------------- |
+| Drive root (autorun files and executables)        | 0                          |
+| `AppData\Roaming` and `AppData\Local\Temp`    | 129                        |
+| Executables inside user data folders              | 155                        |
+| Startup folders                                   | 6                          |
+| Double extensions (for example `photo.jpg.exe`) | 0                          |
+| **Total**                                   | **290 (248 unique)** |
+
+Repeated hashes were traced to their paths and explained as benign: copies of an SDK's tools inside student project backups, a project build that appears in both `bin` and `obj`, Zoom installer copies, and Windows `desktop.ini` files. Identical copies of the same tools across backups made at different times also suggest those files have not been modified.
+
+These results apply only to the locations checked. They are not proof that the drive is clean.
+
+### Startup shortcuts reviewed
+
+| Shortcut                            | What it does                                                               | Assessment                                                                                                                                                               |
+| ----------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Canon LBP2900 Status Window.lnk` | Printer driver status window                                               | Benign                                                                                                                                                                   |
+| `desktop.ini` (three copies)      | Created by Windows in Startup folders                                      | Benign                                                                                                                                                                   |
+| `Start Tor Browser.lnk`           | Tor Browser shortcut                                                       | Benign, installed by me in 2019                                                                                                                                          |
+| `figgewt.lnk`                     | Launches `AppData\Local\ahygoyu\vtfto.exe` and passes `xyqaj.js` to it | **Suspicious.** Random names, a script argument, modified 2026-11-14 23:32 UTC, during the lab setup. Target files not yet examined.                               |
+| `user.lnk`                        | Runs `cmd.exe /c explorer hxxp://www2[.]savemax[.]store/` at logon       | **Suspicious, adware-style behaviour.** Dated 2020-05-29. Shortcut metadata shows it was created on this laptop (`idea-pc`), which rules out an external origin. |
+
+These are indicators, not confirmed malware. No VirusTotal lookups have been done yet, and the target program and script have not been analysed.
+
+### MITRE ATT&CK mapping
+
+| Technique                                                                       | Status    | Evidence                                             |
+| ------------------------------------------------------------------------------- | --------- | ---------------------------------------------------- |
+| T1547.001 Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder | Observed  | Two shortcuts in the user's Startup folder           |
+| T1059.003 Command and Scripting Interpreter: Windows Command Shell              | Observed  | `cmd.exe /c` in `user.lnk`                       |
+| T1059.007 Command and Scripting Interpreter: JavaScript                         | Suspected | `xyqaj.js` passed to `vtfto.exe`                 |
+| T1036 Masquerading                                                              | Suspected | `vtfto.exe` may be a renamed system utility        |
+| T1091 Replication Through Removable Media                                       | Suspected | USB behaviour observed, not yet linked to a file     |
+| T1564.001 Hide Artifacts: Hidden Files and Directories                          | Suspected | Files hidden on USB sticks, not yet linked to a file |
+
+Reference: MITRE ATT&CK®, https://attack.mitre.org/, Enterprise matrix, version v20.1, accessed 16 November 2026. ATT&CK® is a registered trademark of The MITRE Corporation.
+
+---
+
+## 🛠️ Scripts
+
+All scripts are read-only: they mount the Windows drive read-only, run nothing from it, and write results to a separate folder that is excluded from Git. I wrote them with AI assistance, then reviewed each step, ran them on my own lab, and corrected the gaps I found.
+
+| Script                             | Purpose                                                                                                                                  | Status               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `scripts/evidence-hash.sh`       | Hashes executables in likely hiding places and flags repeated hashes                                                                     | Run                  |
+| `scripts/inspect-startup-lnk.sh` | Reads the targets, timestamps and hashes of Startup shortcuts                                                                            | Run                  |
+| `scripts/inspect-ahygoyu.sh`     | Lists and hashes the folder launched by the suspicious shortcut, compares `vtfto.exe` with genuine script hosts, and builds a timeline | Written, not yet run |
+
+---
+
 ## 🩹 Troubleshooting Log
 
-| Problem                                                              | Cause                                                                            | Resolution                                                            |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Unsure if the IPv4 configuration tab sets the internet connection    | That tab controls the router's own LAN side, not the upstream link               | Used the WAN settings instead                                         |
-| Edit the existing WAN entry or create a new one                      | The existing entry was a carrier management profile                              | Left it alone and created a new `INTERNET` WAN service              |
-| No field to enter an IP address                                      | The Huawei assigns the address via DHCP                                          | Nothing to enter; confirmed the WAN IP on the status page             |
-| Dynamic Route offered RIP, OSPF and BGP                              | These are router-to-router protocols and are not needed here                     | Backed out and used Default Route                                     |
-| Windows 8 laptop reached the admin page but not websites             | The admin page is local. The laptop's Chrome is outdated                         | Confirmed the network with ping tests and a phone on the D-Link Wi-Fi |
-| Ping to 192.168.3.1 showed "host unreachable" but 4 packets received | Windows counts an error from a nearby device as a received packet                | Read as correct isolation                                             |
-| Remote Desktop unavailable                                           | Windows 8 Single Language is a Home-level edition and cannot accept incoming RDP | Used TightVNC instead                                                 |
+| Problem                                                              | Cause                                                                            | Resolution                                                                      |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Unsure if the IPv4 configuration tab sets the internet connection    | That tab controls the router's own LAN side, not the upstream link               | Used the WAN settings instead                                                   |
+| Edit the existing WAN entry or create a new one                      | The existing entry was a carrier management profile                              | Left it alone and created a new `INTERNET` WAN service                        |
+| No field to enter an IP address                                      | The Huawei assigns the address via DHCP                                          | Nothing to enter; confirmed the WAN IP on the status page                       |
+| Dynamic Route offered RIP, OSPF and BGP                              | These are router-to-router protocols and are not needed here                     | Backed out and used Default Route                                               |
+| Windows 8 laptop reached the admin page but not websites             | The admin page is local. The laptop's Chrome is outdated                         | Confirmed the network with ping tests and a phone on the D-Link Wi-Fi           |
+| Ping to 192.168.3.1 showed "host unreachable" but 4 packets received | Windows counts an error from a nearby device as a received packet                | Read as correct isolation                                                       |
+| Remote Desktop unavailable                                           | Windows 8 Single Language is a Home-level edition and cannot accept incoming RDP | Used TightVNC instead                                                           |
+| Firefox extremely slow in the live session                           | The laptop has 2 GB RAM and a live session keeps its files in memory             | Ran scripts in the terminal and did lookups from Windows 11                     |
+| Windows drive auto-mounted when Mint started                         | Mint mounts drives automatically, possibly read-write                            | Remounted read-only and confirmed `ro` with `findmnt`                       |
+| Share not visible from Mint ("Could not display smb://...")          | `net share` showed the folder was never shared                                 | Created the share from the command line                                         |
+| `net share` returned "System error 5, Access is denied"            | The Command Prompt was not running as administrator                              | Reopened it as administrator                                                    |
+| Unexpected `Users` share with Everyone: Full on Windows 11         | Left by an earlier sharing attempt                                               | Found with `net share` and deleted it                                         |
+| `icacls` hung while removing a lab account's permission            | The account still had an open session from the laptop                            | Closed the session and deleted the account; the orphaned entry grants no access |
+| Evidence folder was staged by Git and `.gitignore` had no effect   | The file was saved as `gitignore`, without the leading dot                     | Unstaged the files and renamed the file                                         |
 
 ---
 
 ## 🔐 Security Measures
 
-- The infected laptop stays off the household network and sits only behind the D-Link.
+- The suspected-infected laptop stays off the household network and sits only behind the D-Link.
 - NAT and the firewall are enabled on the lab WAN connection.
-- USB drives used with the laptop are not plugged into the Windows 11 machine, because the infection spreads through USB sticks.
+- Evidence is collected from a live USB with the Windows drive mounted read-only, so the infected system does not run.
+- USB drives used with the laptop are not plugged into the Windows 11 machine, because the behaviour observed suggests the infection spreads through USB sticks.
 - The Windows 8 laptop receives no security patches, so it is treated as compromised and not used for real logins.
 - VNC is unencrypted, so it is used only inside the lab network, never forwarded to the internet, and with a strong password.
 - File transfer and clipboard sharing are disabled in the remote session, so nothing moves from the laptop to Windows 11.
+- Temporary network shares used a dedicated low-privilege account, were audited with `net share` and `icacls`, and were deleted after use.
+- Raw evidence stays outside the repository, and indicators such as web addresses are written in defanged form.
 - Download checksums are verified before use.
 
 ---
@@ -158,29 +247,34 @@ Checksum command used on Windows 11: `certutil -hashfile <filename> SHA256`
 ### Phase 2: Data Preservation 🔄
 
 - [X] Download and verify the Linux Mint 22.3 MATE ISO
-- [ ] Create the bootable live USB
+- [X] Create the bootable live USB
+- [X] Mount the laptop's drive read-only from the live USB
 - [ ] Identify important data
 - [ ] Create backups (read-only copy of the original, then a working copy)
 - [ ] Verify backup integrity
 - [ ] Document the backup process
 
-### Phase 3: Windows Administration
+### Phase 3: Windows Administration 🔄
 
 - [ ] Configure administrative access
-- [ ] Practice PowerShell administration
+- [X] Practice PowerShell administration
 - [ ] Review Windows services
 - [ ] Review scheduled tasks
-- [ ] Review startup applications
+- [X] Review startup applications
+- [X] Audit exposed network shares and permissions on Windows 11
 - [ ] Configure appropriate security controls
 
-### Phase 4: Endpoint Investigation
+### Phase 4: Endpoint Investigation 🔄
 
 - [ ] Review Windows Event Logs
 - [ ] Investigate suspicious processes
 - [ ] Examine network connections
 - [ ] Investigate USB-related behaviour
-- [ ] Identify possible persistence mechanisms
-- [ ] Document findings
+- [X] Triage file hashes from likely hiding places
+- [X] Identify possible persistence mechanisms
+- [ ] Analyse the targets of the suspicious shortcuts
+- [ ] Look up suspicious hashes on VirusTotal
+- [ ] Document findings (in progress)
 
 ### Phase 5: Remediation
 
@@ -191,24 +285,30 @@ Checksum command used on Windows 11: `certutil -hashfile <filename> SHA256`
 - [ ] Test system stability
 - [ ] Document the remediation process
 
-### Phase 6: Documentation & Portfolio
+### Phase 6: Documentation & Portfolio 🔄
 
 - [ ] Document the final network topology
 - [ ] Document investigation findings
 - [ ] Document remediation steps
-- [ ] Record lessons learned
+- [ ] Record lessons learned (in progress)
 - [ ] Add screenshots and technical evidence
 - [ ] Update the README with completed work
+
+---
+
+## ⏭️ Next Steps
+
+1. Run `inspect-ahygoyu.sh` to examine what the suspicious shortcut launches, and compare `vtfto.exe` with the genuine Windows script host.
+2. Look up the hashes on VirusTotal and read the script as text, without running it.
+3. Back up the laptop's data to the external drive, after checking the drive's health.
+4. Review scheduled tasks, services and the registry Run keys for further persistence.
+5. Plan remediation only after the evidence is documented.
 
 ---
 
 ## 🧠 Skills Being Developed
 
 Windows administration, networking, PowerShell, endpoint investigation, incident response, troubleshooting, backup and recovery, access control, security monitoring, root cause analysis and technical documentation.
-
-## ☁️ Azure & Administration Learning
-
-Concepts from my **AZ-104** Azure Administrator training (identity and access, role-based access control, networking, monitoring, security, automation and PowerShell) are applied where they fit, to connect cloud administration concepts with practical infrastructure and endpoint administration.
 
 ---
 
@@ -218,6 +318,10 @@ Concepts from my **AZ-104** Azure Administrator training (identity and access, r
 - Leave carrier-provisioned profiles alone and create a new profile instead of editing them.
 - Windows ping output can mislead, so read the address that replied, not just the statistics.
 - Check the Windows edition before planning around built-in features such as Remote Desktop.
+- My first hashing script only searched `AppData\Roaming`, `Temp` and a short list of file types, so it missed `AppData\Local` and `.js` files. A shortcut's target pointed me to the gap, which taught me to read results critically and widen the search.
+- Auditing my own shares with `net share` found an exposed share I had not created on purpose, so check what is exposed, not just what you set up.
+- A clean result in the places checked is a finding, but it is not proof of a clean system.
+- Keep raw evidence out of version control, and describe findings as indicators until they are confirmed.
 
 ---
 
@@ -227,4 +331,4 @@ This laboratory is intended for **educational and defensive security purposes**.
 
 ## 🚀 Future Direction
 
-The long-term goal is a documented, practical lab rather than a collection of notes, showing how **Networking → Windows Administration → PowerShell → Security → Azure Administration** combine in one infrastructure and cybersecurity environment.
+The long-term goal is a documented, practical lab rather than a collection of notes, showing how **Networking → Windows Administration → PowerShell → Endpoint Investigation → Incident Response** combine in one infrastructure and cybersecurity environment.
