@@ -5,6 +5,8 @@ all-hashes.txt
 duplicates.txt
 hashes*.txt
 
+*.csv\n03-defender
+
 # ---- Backups, disk images and installers ----
 backup/
 backups/
